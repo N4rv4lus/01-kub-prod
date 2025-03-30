@@ -12,10 +12,10 @@ version = 2
   path = ""
 
 [debug]
-  address = ""
+  address = "/run/containerd/debug.sock"
   format = ""
   gid = 0
-  level = ""
+  level = "info"
   uid = 0
 
 [grpc]
