@@ -1,6 +1,6 @@
 disabled_plugins = []
 imports = []
-oom_score = 0
+ oom_score = 0
 plugin_dir = ""
 required_plugins = []
 root = "/var/lib/containerd"
