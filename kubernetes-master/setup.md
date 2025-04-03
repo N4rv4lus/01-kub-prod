@@ -19,3 +19,5 @@ and we also need theses ports for administration :
 - 9100 for node-exporter
 
 ## Containerd
+
+install and configure config.toml
