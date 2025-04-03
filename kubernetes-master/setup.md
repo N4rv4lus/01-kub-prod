@@ -21,3 +21,15 @@ and we also need theses ports for administration :
 ## Containerd
 
 install and configure config.toml
+
+## Kernel network setup
+
+## Disable Swap
+comment fstab line to disable swap
+
+## Install Kubelet / Kubeadm / Kubectl
+
+
+## Setup Cluster with KUBEADM 
+
+## Install and Configure CNI - Calico
