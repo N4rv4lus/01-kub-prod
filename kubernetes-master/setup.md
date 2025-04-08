@@ -1,7 +1,7 @@
 We'll see how to setup a "secured" kubernetes environnement. (This is a base setup that will improved, you can always add all lot of configurations to make it more secured because there are always new CVE).
 All the servers OS are on debian 12.10
 
-## Hostname & DNS
+# Hostname & DNS
 
 Setup you hostname : 
 ```shell
@@ -10,10 +10,11 @@ hostnamectl KubMaster00
 
 Add your hostname to the forward and reverse zone in your dns.
 
-## Ports & Nftables
+# Ports & Nftables
 On debian 12.10 iptables is deprecated, and the os is using it's "big brother", nftables.
 So here setup your nftables configuration.
 
+## Kubernetes and administration Ports
 We need to let open theses specifics ports for kubernetes :
 - TCP	Inbound	6443	Kubernetes API server	All
 - TCP	Inbound	2379-2380	etcd server client API	kube-apiserver, etcd
@@ -28,6 +29,7 @@ and we also need theses ports for administration :
 - 53 TCP & UDP for DNS
 - 9100 for node-exporter
 
+## Configuration
 Now edit nftables configuration file (check nftables.conf in the repo):
 ```shell
 nano /etc/nftables.conf
@@ -56,7 +58,9 @@ If you have an error check the journal :
 ```shell
 journalctl -xeu nftables
 ```
-## Containerd
+# Kernel network setup
+
+## /etc/sysctl.d
 
 As mentionned in kubernetes documentation enable IPv4 packet forwarding for CNI : (https://kubernetes.io/docs/setup/production-environment/container-runtimes/)
 ```shell
@@ -86,6 +90,13 @@ You can also check the only line with :
 ```shell
 /usr/sbin/sysctl net.ipv4.ip_forward
 ```
+
+
+
+# Containerd
+
+
+## Containerd installation
 Now install containerd and runc :
 ```shell
 apt install -y containerd runc
@@ -113,17 +124,6 @@ containerd config default > /etc/containerd/config.toml
 ```
 This should not output anything, and now you can check the default configuration for containerd.
 ```shell
-version = 2
-
-[plugins]
-  [plugins."io.containerd.grpc.v1.cri"]
-    [plugins."io.containerd.grpc.v1.cri".cni]
-      bin_dir = "/usr/lib/cni"
-      conf_dir = "/etc/cni/net.d"
-  [plugins."io.containerd.internal.v1.opt"]
-    path = "/var/lib/containerd/opt"
-root@KubMaster00:/home/administrator# containerd config default > /etc/containerd/config.toml
-root@KubMaster00:/home/administrator# cat /etc/containerd/config.toml
 disabled_plugins = []
 imports = []
 oom_score = 0
@@ -409,7 +409,6 @@ Apr 05 19:00:50 KubMaster00 containerd[2349]: time="2025-04-05T19:00:50.36671457
 Apr 05 19:00:50 KubMaster00 containerd[2349]: time="2025-04-05T19:00:50.366772666+02:00" level=info msg="containerd successfully booted in 0.009104s"
 Apr 05 19:00:50 KubMaster00 systemd[1]: Started containerd.service - containerd container runtime.
 ```
-## Kernel network setup
 
 ## Disable Swap
 comment fstab line to disable swap
