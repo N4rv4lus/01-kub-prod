@@ -91,7 +91,28 @@ You can also check the only line with :
 /usr/sbin/sysctl net.ipv4.ip_forward
 ```
 
+## /etc/modules-load.d
 
+Now create and /etc/modules-load.d/k8s.conf, this will permit to load modules in the kernel to be able to load at start and make the CNI functionnal.
+There are 2 modules :
+- br_netfiler - Bridge Netfilter Module for bridged network to use the host's ethernet network interface
+- Overlay - Overlay Filesystem Module for file system
+
+The modules that will be added are :
+br_netfiler
+overlay
+```shell
+echo -e "br_netfilter\noverlay" | sudo tee /etc/modules-load.d/k8s.conf
+```
+Now directly load the modules or restart your server.
+```shell
+sudo modprobe br_netfilter
+sudo modprobe overlay
+```
+You can check that they are correctly loaded with :
+```shell
+lsmod | grep -E 'br_netfilter|overlay'
+```
 
 # Containerd
 
