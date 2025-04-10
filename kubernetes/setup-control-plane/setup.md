@@ -114,6 +114,50 @@ You can check that they are correctly loaded with :
 lsmod | grep -E 'br_netfilter|overlay'
 ```
 
+## Disable Swap
+Since swap in kubernetes is in beta we will disable it.
+It is a work under progress, because for now swap in kubernetes has a few issues with the isolation if a pod needs to use the swap.
+```shell
+nano /etc/fstab
+```
+and comment the swap line : 
+```shell
+# /etc/fstab: static file system information.
+#
+# Use 'blkid' to print the universally unique identifier for a
+# device; this may be used with UUID= as a more robust way to name devices
+# that works even if disks are added and removed. See fstab(5).
+#
+# systemd generates mount units based on this file, see systemd.mount(5).
+# Please run 'systemctl daemon-reload' after making changes here.
+#
+# <file system> <mount point>   <type>  <options>       <dump>  <pass>
+/dev/mapper/KubMaster00--vg-root /               ext4    errors=remount-ro 0       1
+# /boot was on /dev/sda2 during installation
+UUID=6e7e832b-93cf-45b9-ac10-7a6e439c74d1 /boot           ext2    defaults        0       2
+# /boot/efi was on /dev/sda1 during installation
+UUID=25B0-AC27  /boot/efi       vfat    umask=0077      0       1
+/dev/mapper/KubMaster00--vg-home /home           ext4    defaults        0       2
+/dev/mapper/KubMaster00--vg-tmp /tmp            ext4    defaults        0       2
+/dev/mapper/KubMaster00--vg-var /var            ext4    defaults        0       2
+#/dev/mapper/KubMaster00--vg-swap_1 none            swap    sw              0       0
+/dev/sr0        /media/cdrom0   udf,iso9660 user,noauto     0       0
+```
+Now it will swap will be disabled when the server will be restarted, but will still have one more step, disable the swap now to avoid needing to restart the server :
+```shell
+/sbin/swapoff -a
+```
+Now check that the swap has been disabled :
+```shell
+free -m
+```
+here is the output you should have :
+```shell
+               total        used        free      shared  buff/cache   available
+Mem:            7937         467        7245           3         474        7469
+Swap:              0           0           0
+```
+
 # Containerd
 
 ## Containerd installation
@@ -430,49 +474,7 @@ Apr 05 19:00:50 KubMaster00 containerd[2349]: time="2025-04-05T19:00:50.36677266
 Apr 05 19:00:50 KubMaster00 systemd[1]: Started containerd.service - containerd container runtime.
 ```
 
-## Disable Swap
-Since swap in kubernetes is in beta we will disable it.
-It is a work under progress, because for now swap in kubernetes has a few issues with the isolation if a pod needs to use the swap.
-```shell
-nano /etc/fstab
-```
-and comment the swap line : 
-```shell
-# /etc/fstab: static file system information.
-#
-# Use 'blkid' to print the universally unique identifier for a
-# device; this may be used with UUID= as a more robust way to name devices
-# that works even if disks are added and removed. See fstab(5).
-#
-# systemd generates mount units based on this file, see systemd.mount(5).
-# Please run 'systemctl daemon-reload' after making changes here.
-#
-# <file system> <mount point>   <type>  <options>       <dump>  <pass>
-/dev/mapper/KubMaster00--vg-root /               ext4    errors=remount-ro 0       1
-# /boot was on /dev/sda2 during installation
-UUID=6e7e832b-93cf-45b9-ac10-7a6e439c74d1 /boot           ext2    defaults        0       2
-# /boot/efi was on /dev/sda1 during installation
-UUID=25B0-AC27  /boot/efi       vfat    umask=0077      0       1
-/dev/mapper/KubMaster00--vg-home /home           ext4    defaults        0       2
-/dev/mapper/KubMaster00--vg-tmp /tmp            ext4    defaults        0       2
-/dev/mapper/KubMaster00--vg-var /var            ext4    defaults        0       2
-#/dev/mapper/KubMaster00--vg-swap_1 none            swap    sw              0       0
-/dev/sr0        /media/cdrom0   udf,iso9660 user,noauto     0       0
-```
-Now it will swap will be disabled when the server will be restarted, but will still have one more step, disable the swap now to avoid needing to restart the server :
-```shell
-/sbin/swapoff -a
-```
-Now check that the swap has been disabled :
-```shell
-free -m
-```
-here is the output you should have :
-```shell
-               total        used        free      shared  buff/cache   available
-Mem:            7937         467        7245           3         474        7469
-Swap:              0           0           0
-```
+
 
 ## Install Kubelet / Kubeadm / Kubectl
 
