@@ -16,13 +16,13 @@ So here setup your nftables configuration.
 
 ## Kubernetes and administration Ports
 We need to let open theses specifics ports for kubernetes :
-- TCP	Inbound	6443	Kubernetes API server	All
+- TCP	Inbound	6443 Kubernetes API server	All
 - TCP	Inbound	2379-2380	etcd server client API	kube-apiserver, etcd
 - TCP	Inbound	10250	Kubelet API	Self, Control plane
 - TCP	Inbound	10259	kube-scheduler	Self
 - TCP	Inbound	10257	kube-controller-manager	Self
-- UDP   Inbound 4789    CNI for calico vxlan
-- UDP   Outound 4789    CNI for calico vxlan
+- UDP Inbound 4789 CNI for calico vxlan
+- UDP Outound 4789 CNI for calico vxlan
 
 and we also need theses ports for administration :
 - 22 for ssh access
