@@ -3,41 +3,45 @@ Kubernets is divided in 2 parts, the master/control plane that will manage the c
 # Master
 Here is a dashboard that present the master components :
 
-| Composant                 | Rôle principal                                               | Géré par / dépend de             | Outil(s) associé(s)                  |
-|---------------------------|--------------------------------------------------------------|----------------------------------|--------------------------------------|
-| kube-apiserver            | Point d’entrée REST du cluster                               | kubelet (pod statique)           | kubectl, kubeadm                     |
-| kube-scheduler            | Assigne les pods aux nodes                                   | kubelet (pod statique)           | -                                    |
-| kube-controller-manager   | Maintient l’état désiré du cluster                           | kubelet (pod statique)           | -                                    |
-| cloud-controller-manager  | Intégration avec les cloud providers (LB, volumes, etc.)     | kubelet (pod statique, optionnel)| -                                    |
-| etcd                      | Base de données clé/valeur du cluster                        | kubelet (pod statique)           | -                                    |
-| Admission Controllers     | Valident ou modifient les requêtes à l’API Server            | kube-apiserver                   | Flags dans kube-apiserver            |
-| CoreDNS                   | DNS interne pour les pods et services                        | kubelet / déploiement            | -                                    |
-| Metrics Server            | Fournit les métriques système aux autoscalers                | kubelet, API Server              | metrics-server                       |
-| kubeadm                   | Installation/configuration du Control Plane                  | Système hôte                     | kubeadm                              |
+| Component                | Main Role                                                   | Managed by / Depends on        | Tool(s) Associated          | Port(s) Used              |
+|--------------------------|-------------------------------------------------------------|--------------------------------|-----------------------------|---------------------------|
+| kube-apiserver           | Central REST entrypoint to the cluster                      | kubelet (static pod)           | kubectl, kubeadm            | 6443 (HTTPS)              |
+| kube-scheduler           | Assigns pods to nodes                                       | kubelet (static pod)           | -                           | Not exposed               |
+| kube-controller-manager  | Maintains desired state (e.g. deployments, replicas, etc.)  | kubelet (static pod)           | -                           | Not exposed               |
+| cloud-controller-manager | Cloud provider integration (LBs, disks, IPs, etc.)          | kubelet (static pod, optional) | -                           | Varies by cloud provider  |
+| etcd                     | Key-value store of the entire cluster state                 | kubelet (static pod)           | -                           | 2379 (client), 2380 (peer)|
+| Admission Controllers    | Validate/Mutate API requests                                | kube-apiserver                 | kube-apiserver              | Included in 6443          |
+| CoreDNS                  | DNS for pods and services                                   | kubelet / deployment           | -                           | 53 (UDP/TCP), 9153 (metrics) |
+| Metrics Server           | Exposes real-time CPU/memory metrics                        | kubelet, API Server            | metrics-server              | Not directly exposed      |
+| kubeadm                  | Bootstrap/configure the Control Plane                       | Host system                    | kubeadm                     | 6443, SSH                 |
 
-You can check in the repository how to setup a control plane in : /kubernetes/setup-control-plane (will be added in a short period)
+
+You can check in the repository how to setup a control plane in : /kubernetes/setup-control-plane 
 
 ## Workers
 Here is a dashboard that present the workers components :
+You can check in the repository how to setup a control plane in : /kubernetes/setup-workers (will be added in a short period)
 
-| Composant          | Rôle principal                                              | Géré par / dépend de          | Outil(s) associé(s)                    |
-|--------------------|-------------------------------------------------------------|-------------------------------|----------------------------------------|
-| kubelet            | Exécute localement les ordres du Control Plane              | API Server                    | kubeadm, kubectl                       |
-| kube-proxy         | Gère le routage réseau entre services/pods                  | iptables/IPVS, CNI            | kubeadm                                |
-| container runtime  | Exécute les containers (containerd, CRI-O...)               | kubelet via CRI               | containerd, CRI-O, Docker (deprecated) |
-| CNI plugins        | Configure le réseau des pods (overlay ou non)               | kubelet via interface CNI     | calico, flannel, cilium, etc.          |
-| CSI plugins        | Gère les volumes de stockage (dynamic provisioning)         | kubelet via interface CSI     | rook-ceph, longhorn, etc.              |
+| Component          | Main Role                                                    | Managed by / Depends on      | Tool(s) Associated          | Port(s) Used                        |
+|--------------------|--------------------------------------------------------------|------------------------------|-----------------------------|-------------------------------------|
+| kubelet            | Applies control plane orders locally                         | API Server                   | kubeadm, kubectl            | 10250 (HTTPS)                       |
+| kube-proxy         | Manages service/pod network routing                          | iptables/IPVS, CNI           | kubeadm                     | 10256 (metrics), NodePort range 30000–32767 |
+| container runtime  | Runs containers (containerd, CRI-O...)                       | kubelet via CRI              | containerd, CRI-O, Docker   | Varies (usually not exposed)       |
+| CNI plugins        | Configures pod networking (overlay or direct)                | kubelet via CNI interface    | calico, flannel, cilium     | Depends on CNI (e.g. Calico: 4789 UDP / BGP: 179) |
+| CSI plugins        | Manages dynamic storage provisioning                         | kubelet via CSI interface    | rook-ceph, longhorn, etc.   | Depends on plugin                  |
 
-You can check in the repository how to setup a control plane in : /kubernetes/setup-workers
+
 
 ## Transerval Tools (clients/admin)
 Here is a dashboard that present the tools from a admin/clients/user of kubernetes :
-
-| Outil        | Fonction                                                     | Utilisé avec / dépend de        |
-|--------------|--------------------------------------------------------------|---------------------------------|
-| kubectl      | Interface CLI principale pour interagir avec l’API Server    | kube-apiserver                  |
-| kubeadm      | Bootstrap et configuration du cluster Kubernetes             | Nodes, API Server               |
-| helm         | Gestionnaire de packages Kubernetes (charts)                 | kube-apiserver                  |
-| kustomize    | Générateur de manifestes Kubernetes personnalisés            | kubectl, CI/CD                  |
-
 You can check in the repository how to setup a control plane in : /kubernetes/use-kubernetes (will be added in a short period)
+
+| Component          | Main Role                                                    | Managed by / Depends on      | Tool(s) Associated          | Port(s) Used                        |
+|--------------------|--------------------------------------------------------------|------------------------------|-----------------------------|-------------------------------------|
+| kubelet            | Applies control plane orders locally                         | API Server                   | kubeadm, kubectl            | 10250 (HTTPS)                       |
+| kube-proxy         | Manages service/pod network routing                          | iptables/IPVS, CNI           | kubeadm                     | 10256 (metrics), NodePort range 30000–32767 |
+| container runtime  | Runs containers (containerd, CRI-O...)                       | kubelet via CRI              | containerd, CRI-O, Docker   | Varies (usually not exposed)       |
+| CNI plugins        | Configures pod networking (overlay or direct)                | kubelet via CNI interface    | calico, flannel, cilium     | Depends on CNI (e.g. Calico: 4789 UDP / BGP: 179) |
+| CSI plugins        | Manages dynamic storage provisioning                         | kubelet via CSI interface    | rook-ceph, longhorn, etc.   | Depends on plugin                  |
+
+
