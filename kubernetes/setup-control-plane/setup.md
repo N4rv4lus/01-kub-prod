@@ -474,11 +474,47 @@ Apr 05 19:00:50 KubMaster00 containerd[2349]: time="2025-04-05T19:00:50.36677266
 Apr 05 19:00:50 KubMaster00 systemd[1]: Started containerd.service - containerd container runtime.
 ```
 
-
-
 ## Install Kubelet / Kubeadm / Kubectl
 
-
+First setup the new links for the latest versions of kubernetes (1.32) : 
+```shell
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+```
+Now download and install kubernetes with apt :
+```shell
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+```
+Now enable kubelet with systemctl to run it at the start of the server and have a journalization of kubelet :
+```shell
+sudo systemctl enable --now kubelet
+```
+Now check that kubelet is enabled, it is still correct even if it's error code is : "status=1/FAILURE" it's because we haven't run the kubernetes installation with kubeadm.
+We will check after running kubeadm init, and it will be runnging correctly.
+```shell
+systemctl status kubelet
+```
+the output should be :
+```shell
+root@KubMaster00:/home/administrator# systemctl status kubelet
+● kubelet.service - kubelet: The Kubernetes Node Agent
+     Loaded: loaded (/lib/systemd/system/kubelet.service; enabled; preset: enabled)
+    Drop-In: /usr/lib/systemd/system/kubelet.service.d
+             └─10-kubeadm.conf
+     Active: activating (auto-restart) (Result: exit-code) since Fri 2025-04-11 20:30:38 CEST; 4s ago
+       Docs: https://kubernetes.io/docs/
+    Process: 5843 ExecStart=/usr/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_CONFIG_ARGS $KUBELET_KUBEADM_ARGS $KUBELET_EXTRA_ARGS (code=exited, status=1/FAILURE)
+   Main PID: 5843 (code=exited, status=1/FAILURE)
+        CPU: 41ms
+```
+If you need more information why kubelet is not running correctly it's because this configuration file "/var/lib/kubelet/config.yaml" doesn't exist yet and will be created by kubeadm. Confirm you have the same error with :
+```shell
+journalctl -xeu kubelet
+```
 ## Setup Cluster with KUBEADM 
 
 ## Install and Configure CNI - Calico
