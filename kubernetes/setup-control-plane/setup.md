@@ -515,6 +515,33 @@ If you need more information why kubelet is not running correctly it's because t
 ```shell
 journalctl -xeu kubelet
 ```
+
+## Create Groups and Associated Users
+
+Here we will be creating groups and users to segment specific applications to specific users.
+
+First create containerd group and then a containerd user :
+
+```shell
+/sbin/groupadd -g 900 kubernetes
+/sbin/useradd -r -u 900 -g 900 /usr/sbin/nologin kubernetes
+cat /etc/passwd | grep kub
+```
+Here's the output :
+```shell
+kubernetes:x:900:900::/home/kubernetes:/usr/sbin/nologin
+```
+Secondly create the group for containerd : 
+```shell
+/sbin/groupadd -g 901 containerd
+/sbin/useradd -r -u 901 -g containerd -s /usr/sbin/nologin containerd
+cat /etc/passwd | grep containerd
+```
+Here's the output :
+```shell
+containerd:x:901:901::/home/containerd:/usr/sbin/nologin
+```
+
 ## Setup Cluster with KUBEADM 
 
 ## Install and Configure CNI - Calico
